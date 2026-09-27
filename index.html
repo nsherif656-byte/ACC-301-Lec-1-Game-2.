@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة طريقة الأعلى والأدنى High-Low Method 🧮</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #7c3aed;
+            --success: #10b981;
+            --error: #ef4444;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: #f8fafc;
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        .game-card {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 850px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            padding: 25px;
+            position: relative;
+            border: 2px solid #334155;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #334155;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        }
+
+        .title {
+            font-size: 22px;
+            font-weight: 800;
+            color: #60a5fa;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .stat-badge {
+            background: #334155;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        /* Formula Banner */
+        .formula-box {
+            background: #0f172a;
+            border: 1px solid #3b82f6;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #cbd5e1;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        /* Scenario Box */
+        .scenario-box {
+            background: #0f172a;
+            border: 2px solid #475569;
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 20px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .data-table th, .data-table td {
+            border: 1px solid #334155;
+            padding: 8px 12px;
+            font-size: 15px;
+        }
+
+        .data-table th {
+            background: #1e293b;
+            color: #93c5fd;
+        }
+
+        /* Question Box */
+        .q-text {
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #f8fafc;
+        }
+
+        /* Options Grid */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .opt-btn {
+            background: #0f172a;
+            border: 2px solid #475569;
+            border-radius: 12px;
+            padding: 14px 18px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #f8fafc;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .opt-btn:hover:not(:disabled) {
+            border-color: #60a5fa;
+            background: #1e293b;
+            transform: translateY(-2px);
+        }
+
+        .opt-btn.correct {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.2);
+            color: #a7f3d0;
+        }
+
+        .opt-btn.incorrect {
+            border-color: var(--error);
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+        }
+
+        /* Explanation Box */
+        .explanation-box {
+            display: none;
+            background: #0f172a;
+            border: 2px solid #334155;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.8;
+            direction: rtl;
+        }
+
+        /* Action Buttons */
+        .btn-action {
+            width: 100%;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 17px;
+            font-weight: 800;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
+            transition: all 0.2s;
+            display: none;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        /* Overlay Screen */
+        .overlay-screen {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.96);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            border: none;
+            padding: 16px 45px;
+            font-size: 20px;
+            font-weight: 800;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+            transition: transform 0.2s;
+            margin-top: 20px;
+        }
+
+        .btn-start:hover {
+            transform: scale(1.08);
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-card">
+    <div class="header">
+        <div class="title">🧮 High-Low Method Challenge</div>
+        <div class="badge-container">
+            <div class="stat-badge" id="scoreDisplay">النقاط: 0</div>
+            <div class="stat-badge" style="color: #60a5fa;" id="levelDisplay">التمرين: 1/5</div>
+        </div>
+    </div>
+
+    <!-- Quick Reference Formulas -->
+    <div class="formula-box">
+        📐 <b>معادلة التكلفة:</b> $Y = FC + (VCu \times X)$<br>
+        • التكلفة المتغيرة للوحدة ($VCu$) = (أعلى تكلفة - أدنى تكلفة) ÷ (أعلى نشاط - أدنى نشاط)<br>
+        • التكاليف الثابتة ($FC$) = إجمالي التكلفة - ($VCu \times$ حجم النشاط)
+    </div>
+
+    <!-- Scenario Data Container -->
+    <div class="scenario-box" id="scenarioContainer">
+        <!-- Content injected dynamically -->
+    </div>
+
+    <!-- Options -->
+    <div class="options-grid" id="optionsContainer"></div>
+
+    <!-- Explanation -->
+    <div class="explanation-box" id="explanationBox"></div>
+
+    <button class="btn-action" id="nextBtn" onclick="nextQuestion()">التالي ➔</button>
+
+    <!-- Overlay Screen -->
+    <div class="overlay-screen" id="overlay">
+        <h1 style="font-size: 28px; color: #60a5fa; margin-bottom: 10px;">🧮 تحدي طريقة الأعلى والأدنى</h1>
+        <p style="color: #94a3b8; max-width: 500px; font-size: 15px; line-height: 1.6;">
+            اختبر مهاراتك الكمية في فصل التكاليف الثابتة والمتغيرة وحساب إجمالي التكاليف باستخدام طريقة (High-Low Method)!
+        </p>
+        <button class="btn-start" onclick="startGame()">ابدأ اللعب 🚀</button>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        {
+            tableData: `
+                <table class="data-table">
+                    <tr><th>المستوى</th><th>حجم النشاط (وحدات)</th><th>إجمالي التكلفة ($)</th></tr>
+                    <tr style="color: #a7f3d0;"><td>الأعلى (Highest)</td><td>10,000</td><td>$50,000</td></tr>
+                    <tr style="color: #fca5a5;"><td>الأدنى (Lowest)</td><td>4,000</td><td>$26,000</td></tr>
+                </table>
+            `,
+            question: "ما هي التكلفة المتغيرة للوحدة (Variable Cost Per Unit - VCu)؟",
+            options: ["$4.00 لكل وحدة", "$3.00 لكل وحدة", "$5.00 لكل وحدة", "$2.50 لكل وحدة"],
+            correct: 0,
+            explanation: `
+                <b>خطوات الحل:</b><br>
+                1. التغير في التكلفة = $50,000 - $26,000 = $24,000<br>
+                2. التغير في النشاط = 10,000 - 4,000 = 6,000 وحدة<br>
+                3. $VCu = 24,000 ÷ 6,000 = \\mathbf{\$4.00}$ لكل وحدة.
+            `
+        },
+        {
+            tableData: `
+                <p style="font-size: 14px; color: #94a3b8;">(بالاعتماد على بيانات التمرين السابق: VCu = $4.00)</p>
+                <table class="data-table">
+                    <tr><th>المستوى</th><th>حجم النشاط (وحدات)</th><th>إجمالي التكلفة ($)</th></tr>
+                    <tr><td>الأعلى (Highest)</td><td>10,000</td><td>$50,000</td></tr>
+                    <tr><td>الأدنى (Lowest)</td><td>4,000</td><td>$26,000</td></tr>
+                </table>
+            `,
+            question: "ما هو إجمالي التكاليف الثابتة (Fixed Costs - FC)؟",
+            options: ["$10,000", "$12,000", "$14,000", "$8,000"],
+            correct: 0,
+            explanation: `
+                <b>خطوات الحل:</b><br>
+                باستخدام مستوى النشاط الأعلى (10,000 وحدة):<br>
+                إجمالي التكلفة المتغيرة = $10,000 \\times \$4 = \$40,000$<br>
+                $FC = \$50,000 - \$40,000 = \\mathbf{\$10,000}$<br>
+                <i>(أو باستخدام الأدنى: $\$26,000 - (4,000 \\times \$4) = \$10,000$)</i>
+            `
+        },
+        {
+            tableData: `
+                <table class="data-table">
+                    <tr><th>المناسبة</th><th>ساعات التشغيل (X)</th><th>تكلفة الصيانة ($)</th></tr>
+                    <tr style="color: #a7f3d0;"><td>أغسطس</td><td>1,200</td><td>$3,800</td></tr>
+                    <tr style="color: #fca5a5;"><td>فبراير</td><td>500</td><td>$1,700</td></tr>
+                </table>
+            `,
+            question: "احسب التكلفة المتغيرة لكل ساعة تشغيل (VCu):",
+            options: ["$3.00 / ساعة", "$2.10 / ساعة", "$3.50 / ساعة", "$1.80 / ساعة"],
+            correct: 1,
+            explanation: `
+                <b>خطوات الحل:</b><br>
+                1. التغير في التكلفة = $3,800 - $1,700 = $2,100<br>
+                2. التغير في الساعات = 1,200 - 500 = 700 ساعة<br>
+                3. $VCu = 2,100 ÷ 700 = \\mathbf{\$3.00}$ لكل ساعة.
+            `
+        },
+        {
+            tableData: `
+                <p style="font-size: 14px; color: #94a3b8;">معادلة التكلفة المكتشفة هي: Y = $800 + ($3.00 × X)</p>
+            `,
+            question: "إذا كان حجم النشاط المتوقع للشهر القادم هو 900 ساعة تشغيل، فما هو إجمالي التكلفة المتوقعة (Y)؟",
+            options: ["$3,500", "$2,700", "$3,200", "$3,800"],
+            correct: 0,
+            explanation: `
+                <b>خطوات الحل:</b><br>
+                باستخدام دالة التكلفة: $Y = FC + (VCu \\times X)$<br>
+                $Y = 800 + (3.00 \\times 900)$<br>
+                $Y = 800 + 2,700 = \\mathbf{\$3,500}$
+            `
+        },
+        {
+            tableData: `
+                <table class="data-table">
+                    <tr><th>الشهر</th><th>ساعات العمل</th><th>التكلفة الإجمالية ($)</th></tr>
+                    <tr><td>يناير</td><td>2,000</td><td>$12,000</td></tr>
+                    <tr style="color: #a7f3d0;"><td>مارس (الأعلى)</td><td>5,000</td><td>$24,000</td></tr>
+                    <tr style="color: #fca5a5;"><td>أبريل (الأدنى)</td><td>1,000</td><td>$8,000</td></tr>
+                </table>
+            `,
+            question: "حدد المعادلة الصحيحة للتكلفة الإجمالية (Y = a + bX):",
+            options: [
+                "Y = $4,000 + ($4.00 * X)",
+                "Y = $3,000 + ($5.00 * X)",
+                "Y = $2,000 + ($4.00 * X)",
+                "Y = $4,000 + ($3.00 * X)"
+            ],
+            correct: 0,
+            explanation: `
+                <b>خطوات الحل:</b><br>
+                1. $VCu (b) = (24,000 - 8,000) ÷ (5,000 - 1,000) = 16,000 ÷ 4,000 = \$4.00$<br>
+                2. $FC (a) = 24,000 - (5,000 \\times 4) = 24,000 - 20,000 = \$4,000$<br>
+                3. المعادلة هي: $\\mathbf{Y = \$4,000 + (\$4.00 \\times X)}$
+            `
+        }
+    ];
+
+    let currentIdx = 0;
+    let score = 0;
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playAudio(type) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'correct') {
+            osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+            osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.3);
+        } else {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+            osc.frequency.setValueAtTime(120, audioCtx.currentTime + 0.12);
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.25);
+        }
+    }
+
+    function startGame() {
+        score = 0;
+        currentIdx = 0;
+        document.getElementById('overlay').style.display = 'none';
+        document.getElementById('scoreDisplay').textContent = `النقاط: 0`;
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        const q = questions[currentIdx];
+        document.getElementById('scenarioContainer').innerHTML = `
+            ${q.tableData}
+            <div class="q-text">${q.question}</div>
+        `;
+        document.getElementById('levelDisplay').textContent = `التمرين: ${currentIdx + 1}/${questions.length}`;
+
+        const container = document.getElementById('optionsContainer');
+        container.innerHTML = '';
+
+        q.options.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'opt-btn';
+            btn.id = `opt-${idx}`;
+            btn.innerHTML = `<span>${opt}</span>`;
+            btn.onclick = () => selectOption(idx);
+            container.appendChild(btn);
+        });
+
+        document.getElementById('explanationBox').style.display = 'none';
+        document.getElementById('nextBtn').style.display = 'none';
+    }
+
+    function selectOption(selectedIdx) {
+        const q = questions[currentIdx];
+        const isCorrect = selectedIdx === q.correct;
+
+        const buttons = document.querySelectorAll('.opt-btn');
+        buttons.forEach((btn, idx) => {
+            btn.disabled = true;
+            if (idx === q.correct) {
+                btn.classList.add('correct');
+                btn.innerHTML += ` <span>✅</span>`;
+            } else if (idx === selectedIdx && !isCorrect) {
+                btn.classList.add('incorrect');
+                btn.innerHTML += ` <span>❌</span>`;
+            }
+        });
+
+        const expBox = document.getElementById('explanationBox');
+        expBox.style.display = 'block';
+
+        if (isCorrect) {
+            playAudio('correct');
+            score += 20;
+            document.getElementById('scoreDisplay').textContent = `النقاط: ${score}`;
+            expBox.style.borderColor = '#10b981';
+            expBox.innerHTML = `<span style="color: #10b981; font-weight: bold; font-size: 16px;">✅ إجابة صحيحة!</span><br>${q.explanation}`;
+        } else {
+            playAudio('wrong');
+            expBox.style.borderColor = '#ef4444';
+            expBox.innerHTML = `<span style="color: #ef4444; font-weight: bold; font-size: 16px;">❌ إجابة خاطئة</span><br>${q.explanation}`;
+        }
+
+        document.getElementById('nextBtn').style.display = 'block';
+    }
+
+    function nextQuestion() {
+        currentIdx++;
+        if (currentIdx < questions.length) {
+            loadQuestion();
+        } else {
+            finishGame();
+        }
+    }
+
+    function finishGame() {
+        const overlay = document.getElementById('overlay');
+        overlay.innerHTML = `
+            <h1 style="font-size: 30px; color: #10b981; margin-bottom: 10px;">🎉 أحسنت! أكملت التحدي!</h1>
+            <p style="font-size: 20px; color: #f8fafc; margin-bottom: 20px;">مجموع النقاط النهائي: <strong>${score} / ${questions.length * 20}</strong></p>
+            <button class="btn-start" onclick="startGame()">إعادة اللعب 🔄</button>
+        `;
+        overlay.style.display = 'flex';
+    }
+</script>
+
+</body>
+</html>
